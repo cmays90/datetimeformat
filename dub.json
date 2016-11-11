@@ -1,0 +1,16 @@
+{
+	"name": "datetimeformat",
+	"homepage": "https://github.com/cmays90/datetimeformat",
+	"authors": [
+		"Chris Mays"
+	],
+	"description": "A DateTime formatting library for D",
+	"copyright": "Copyright © 2016, Chris Mays",
+	"configurations": [
+                {
+                        "name": "library",
+                        "targetType": "library"
+                }
+        ],
+	"license": "Zlib"
+}
