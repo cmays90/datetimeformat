@@ -769,18 +769,14 @@ immutable string[13] LONG_U_MONTH_NAME = [
 unittest {
 	import std.stdio;
 
-	writefln("Unittest commenced at %s", SysTime.now.toString);
+	writefln("Unittest commenced at %s",  Clock.currTime.toString);
 
-	uint tz = timeZoneOffset;
-	timeZoneOffset = 60;
-	scope(exit) timeZoneOffset = tz;
-
-	SysTime dt = SysTime(2005, 9, 8, 16, 51, 9.427);
+	SysTime dt = SysTime(DateTime(2005, 9, 8, 16, 51, 9), dur!"msecs"(427));
 	// basic formatting
 	assert (dt.format("dd/mm/yy") == "08/09/05");
 	assert (dt.format("Www dt Mmm yyyy BB") == "Thu 8th Sep 2005 AD");
 	assert (dt.format("h:ii AA") == "4:51 PM");
-	assert (dt.format("yyyy-mm-dd HH:ii:ss zzzz") == "2005-09-08 16:51:09 +0100");
+	assert (dt.format("yyyy-mm-dd HH:ii:ss") == "2005-09-08 16:51:09");
 	assert (dt.format("HH:ii:ss.FFF") == "16:51:09.427");
 	// alignment fields
 	assert (dt.format("[------Wwww.....]") == "--Thursday.");
@@ -790,38 +786,38 @@ unittest {
 	assert (dt.format("[9`1Www]") == "111111Thu");
 	assert (dt.format("[`1Wwww-10]") == "1Thursday-");
 	assert (dt.format("[d/m/yyy           ]HH:ii:ss") == "8/9/2005   16:51:09");
-	// collapsible portions (control)
-	assert (dt.format("d Mmm yyy{ B}{ HH:ii:ss zzzz}") == "8 Sep 2005 16:51:09 +0100");
+
+	assert (dt.format("d Mmm yyy{ B}{ HH:ii:ss}") == "8 Sep 2005 16:51:09");
 	assert (dt.format("{d }{Mmm }yyy BB") == "8 Sep 2005 AD");
 	assert (dt.format("HH:ii{:ss}{.FFF}") == "16:51:09.427");
 
-	// create a DTC to test collapsible portions
-	SysTime dtc = SysTime(dt);
-	assert (dtc.format("HH:ii{:ss}{.FFF}") == "16:51:09.427");
-	dtc.millisecond = short.min;
-	assert (dtc.format("HH:ii{:ss}{.FFF}") == "16:51:09");
-	dtc.second = byte.min;
-	assert (dtc.format("HH:ii{:ss}{.FFF}") == "16:51");
-	assert (dtc.format("d Mmm yyy{ B}{ HH:ii:ss zzzz}") == "8 Sep 2005 16:51: +0100");
-	dtc.hour = byte.min;
-	assert (dtc.format("d Mmm yyy{ B}{ HH:ii:ss zzzz}") == "8 Sep 2005 :51: ");
-	dtc.minute = byte.min;
-	assert (dtc.format("d Mmm yyy{ B}{ HH:ii:ss zzzz}") == "8 Sep 2005");
-	assert (dtc.format("{d }{Mmm }yyy BB") == "8 Sep 2005 AD");
-	dtc.month = Month.UNSPEC;
-	assert (dtc.format("{d }{Mmm }yyy BB") == "8 2005 AD");
-	dtc.day = byte.min;
-	assert (dtc.format("{d }{Mmm }yyy BB") == "2005 AD");
+	assert (dt.format("HH:ii{:ss}{.FFF}") == "16:51:09.427");
+	dt.fracSecs(dur!"msecs"(0));
+	assert (dt.format("HH:ii{:ss}{.FFF}") == "16:51:09.000");
+	dt.second = 0;
+	assert (dt.format("HH:ii{:ss}{.FFF}") == "16:51:00.000");
+	assert (dt.format("d Mmm yyy{ B}{ HH:ii:ss}") == "8 Sep 2005 16:51:00");
+	dt.hour = 0;
+	assert (dt.format("d Mmm yyy{ B}{ HH:ii:ss}") == "8 Sep 2005 00:51:00");
+	dt.minute = 0;
+	assert (dt.format("d Mmm yyy{ B}{ HH:ii:ss}") == "8 Sep 2005 00:00:00");
+	assert (dt.format("{d }{Mmm }yyy BB") == "8 Sep 2005 AD");
+	dt.month = Month.min;
+	assert (dt.format("{d }{Mmm }yyy BB") == "8 Jan 2005 AD");
+	dt.day = 1;
+	assert (dt.format("{d }{Mmm }yyy BB") == "1 Jan 2005 AD");
+
+  dt.month = Month.sep;
+  dt.day = 8;
 
 	// nesting of fields and collapsible portions
-	dtc = SysTime(dt);
-	assert (dtc.format("[13 Mmmm [d..]]") == " September 8.");
-	assert (dtc.format("[13 Mmmm{ d}]") == "  September 8");
-	dtc.day = byte.min;
-	assert (dtc.format("[13 Mmmm{ d}]") == "    September");
-	assert (dtc.format("{[13 Mmmm{ d}]}") == "    September");
-	dtc.month = Month.UNSPEC;
-	assert (dtc.format("{[13 Mmmm{ d}]}") == "");
-	dtc.day = 8;
-	assert (dtc.format("{[13 Mmmm{ d}]}") == "            8");
+	assert (dt.format("[13 Mmmm [d..]]") == " September 8.");
+	assert (dt.format("[13 Mmmm{ d}]") == "  September 8");
+	dt.day = 1;
+	assert (dt.format("[13 Mmmm{ d}]") == "  September 1");
+	assert (dt.format("{[13 Mmmm{ d}]}") == "  September 1");
+	dt.month = Month.min;
+	assert (dt.format("{[13 Mmmm{ d}]}") == "    January 1");
+	dt.day = 8;
+	assert (dt.format("{[13 Mmmm{ d}]}") == "    January 8");
 }
