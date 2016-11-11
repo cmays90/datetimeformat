@@ -10,7 +10,7 @@ A DateTime formatting library for D
     void main()
     {
         SysTime dt = SysTime(DateTime(2005, 9, 8, 16, 51, 9), dur!"msecs"(427));
-   	writeln(dt.format("yyyy-mm-dd HH:ii:ss.FFF")); //"2005-09-08 16:51:09.427"
+        writeln(dt.format("yyyy-mm-dd HH:ii:ss.FFF")); //"2005-09-08 16:51:09.427"
     }
 
 #Acknowledgments
